@@ -26,7 +26,7 @@
       <div id="intro">
         <p class="eyebrow">BEFORE YOU SHARE</p>
         <h1>值得一读，<br>也适合你转发吗<span class="accent">？</span></h1>
-        <p class="intro-copy">把当前内容与你的账号方向对照，<br>给下一次分享，多一点判断依据。</p>
+        <p class="intro-copy">对照账号方向，查看 AI 生成迹象与情绪，<br>给下一次分享，多一点判断依据。</p>
       </div>
       <div id="direction-card" class="direction-card">
         <div class="section-label"><span>我的账号方向</span><button id="edit-direction" class="text-button">编辑 <span aria-hidden="true">↗</span></button></div>
@@ -35,13 +35,23 @@
       <div id="idle-details" class="idle-details"><span class="mini-icon" aria-hidden="true">⌘</span><p>聚焦你想分享的内容<span>选中文字时优先检查选区，否则提取页面正文。</span></p></div>
 
       <section id="running" class="running" aria-label="正在检查" hidden>
-        <span class="spinner" aria-hidden="true"></span><h2>正在对照你的方向</h2><p>Jev 正在评估主题、受众和表达…</p><span class="muted">可以关闭弹窗，稍后回来查看结果。</span>
+        <span class="spinner" aria-hidden="true"></span><h2>正在对照你的方向</h2><p>Jev 正在评估转发适配、AI 生成迹象与情绪…</p><span class="muted">可以关闭弹窗，稍后回来查看结果。</span>
       </section>
 
       <section id="result" class="result" aria-label="检查结果" hidden>
         <div class="result-heading"><div><p class="eyebrow">YOUR CONTENT CHECK</p><h2 id="verdict"></h2></div><span id="verdict-symbol" class="verdict-symbol" aria-hidden="true"></span></div>
         <p id="source-title" class="source-title"></p>
         <p id="source-meta" class="source-meta"></p>
+        <section class="analysis-card" aria-label="AI 生成判断与内容情绪">
+          <h3>内容特征</h3>
+          <div id="analysis-summaries"></div>
+          <details id="analysis-details">
+            <summary>查看模型概率</summary>
+            <div id="analysis-probabilities"></div>
+            <p class="analysis-note">选项概率与置信度是模型判断，不是检测准确率；置信度表示选项分布的集中程度。</p>
+          </details>
+          <p class="analysis-note">AI 来源仅凭文本无法证实；情绪描述文本表达，不代表作者的真实心理状态。</p>
+        </section>
         <div id="dimensions" class="dimensions"></div>
         <div class="reason-box"><span class="section-label">判断依据 · 规则汇总</span><ul id="reasons"></ul></div>
         <p class="result-note">概率表示模型对各项条件成立的判断，不代表转发效果或事实核验。中文结果尤其需要复核。</p>
@@ -68,6 +78,6 @@
       <button id="clear-settings" class="clear-button" type="button" disabled>清除 Key、方向与本次结果</button>
     </section>
   </main>
-  <footer><span>CONTENT DETECT <span class="footer-dot">/</span> 0.1</span><a href="https://typesafe.ai/" target="_blank" rel="noreferrer noopener">Powered by Jev ↗</a></footer>
+  <footer><span>CONTENT DETECT <span class="footer-dot">/</span> 0.2</span><a href="https://typesafe.ai/" target="_blank" rel="noreferrer noopener">Powered by Jev ↗</a></footer>
 </body>
 </html>

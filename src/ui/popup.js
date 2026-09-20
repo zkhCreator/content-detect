@@ -5,6 +5,7 @@
  * Non-goals: API calls, content extraction, HTML rendering from pages or model responses.
  */
 import { DIMENSIONS } from '../core/evaluation.js';
+import { ANALYSES } from '../core/content-analysis.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = id => document.getElementById(id);
@@ -57,6 +58,52 @@ function renderAction() {
   $('analyze').textContent = busy ? '正在检查…' : !configured ? '先设定我的账号方向 ↗' : tabId === null ? '请在普通网页中打开插件' : document.body.dataset.state === 'done' ? '重新检查当前内容 ↗' : '检查当前页 ↗';
 }
 
+function renderAnalysis(analysis) {
+  $('analysis-summaries').replaceChildren();
+  $('analysis-probabilities').replaceChildren();
+  $('analysis-details').hidden = !analysis;
+  const reasons = {
+    insufficient: '文字或上下文不足，暂不判断。',
+    uncertain: '现有证据不能支持明确分类。',
+    lowConfidence: '模型判断分歧较大，建议人工复核。',
+  };
+  for (const { id, label, options } of ANALYSES) {
+    const answer = analysis?.[id];
+    const row = document.createElement('div');
+    row.className = 'analysis-row';
+    row.id = `analysis-${id}`;
+    const heading = document.createElement('span');
+    heading.textContent = label;
+    const decision = document.createElement('strong');
+    decision.className = 'analysis-decision';
+    decision.textContent = answer ? options[answer.decision] ?? '无法判断' : '待重新检查';
+    row.append(heading, decision);
+    if (!answer || answer.reason) {
+      const explanation = document.createElement('small');
+      explanation.textContent = answer ? reasons[answer.reason] : '旧结果不含此项，重新检查即可获取。';
+      row.append(explanation);
+    }
+    $('analysis-summaries').append(row);
+    if (answer) {
+      const group = document.createElement('div');
+      group.className = 'probability-group';
+      const title = document.createElement('p');
+      title.textContent = `${label} · 模型置信度 ${Math.round(answer.confidence * 100)}%`;
+      group.append(title);
+      for (const [key, name] of Object.entries(options)) {
+        const item = document.createElement('div');
+        const text = document.createElement('span');
+        text.textContent = name;
+        const probability = document.createElement('span');
+        probability.textContent = `${Math.round(answer.probabilities[key] * 100)}%`;
+        item.append(text, probability);
+        group.append(item);
+      }
+      $('analysis-probabilities').append(group);
+    }
+  }
+}
+
 function renderJob(job) {
   clearTimeout(poll);
   busy = job?.status === 'running';
@@ -75,6 +122,7 @@ function renderJob(job) {
     $('verdict-symbol').textContent = symbol;
     $('source-title').textContent = page.title || '未命名页面';
     $('source-meta').textContent = `${page.origin} · ${page.scope === 'selection' ? '选区' : '正文'} ${page.characters.toLocaleString()} 字符 · ${new Date(job.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    renderAnalysis(result.analysis);
     $('dimensions').replaceChildren(...DIMENSIONS.map(dimension => {
       const value = result.values[dimension.id];
       const row = document.createElement('div');

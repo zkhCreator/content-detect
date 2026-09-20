@@ -10,6 +10,7 @@ import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { extractPage } from '../src/browser/extract.js';
+import { analysisAnswers, choiceAnswer } from '../tests/fixtures/answers.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const fixture = await readFile(new URL('../tests/fixtures/article.html', import.meta.url));
@@ -42,11 +43,23 @@ try {
     if (responseMode === 'rate') return route.fulfill({ status: 429, body: 'SYNTHETIC_PRIVATE_ERROR' });
     if (responseMode === 'malformed') return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     const next = { ...values };
+    const analysis = analysisAnswers();
     if (responseMode === 'review') next.audienceValue = .5;
     if (responseMode === 'skip') next.boundaryConflict = .95;
+    if (responseMode === 'ai-negative') {
+      analysis.aiOrigin = choiceAnswer('aiOrigin', 'likely_ai');
+      analysis.sentiment = choiceAnswer('sentiment', 'negative');
+      analysis.emotion = choiceAnswer('emotion', 'anger');
+    }
+    if (responseMode === 'mixed') {
+      analysis.aiOrigin = choiceAnswer('aiOrigin', 'likely_ai', .3, .6);
+      analysis.sentiment = choiceAnswer('sentiment', 'mixed');
+      analysis.emotion = choiceAnswer('emotion', 'mixed');
+    }
+    if (responseMode === 'bad-analysis') delete analysis.emotion;
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
       model: 'jev-test-fixture',
-      answers: Object.fromEntries(Object.entries(next).map(([key, noul]) => [key, { type: 'noul', noul }])),
+      answers: { ...Object.fromEntries(Object.entries(next).map(([key, noul]) => [key, { type: 'noul', noul }])), ...analysis },
     }) });
   });
   let [worker] = context.serviceWorkers();
@@ -95,6 +108,14 @@ try {
   await popup.locator('#analyze').click();
   await expect(popup.locator('#verdict')).toHaveText('适合转发');
   assert.equal(calls.length, 1);
+  assert.equal(Object.keys(calls[0].body.questions).length, 8, 'all judgments share one request');
+  await expect(popup.locator('#analysis-aiOrigin .analysis-decision')).toHaveText('偏向人工写作');
+  await expect(popup.locator('#analysis-sentiment .analysis-decision')).toHaveText('中性');
+  await expect(popup.locator('#analysis-emotion .analysis-decision')).toHaveText('平静／客观');
+  await popup.locator('#analysis-details summary').click();
+  await expect(popup.locator('#analysis-probabilities')).toContainText('模型置信度 80%');
+  await expect(popup.locator('#analysis-probabilities')).toContainText('90%');
+  await popup.locator('#analysis-details summary').click();
   assert.equal(calls[0].authorization, 'Bearer fixture-key-not-a-credential');
   assert.equal(calls[0].body.state.accountGoal, goal);
   assert.equal(calls[0].body.state.page.sourceOrigin, address);
@@ -110,6 +131,34 @@ try {
   assert.deepEqual(storage.sync, {});
   for (const marker of ['fixture-key', '构建 AI 产品', 'SYNTHETIC_QUERY', 'SYNTHETIC_HASH']) assert.equal(JSON.stringify(storage.session).includes(marker), false);
   assert.deepEqual(Object.keys(storage.local), ['settings']);
+  assert.equal(storage.session.job.result.analysis.aiOrigin.decision, 'likely_human');
+
+  // A pre-update cached result stays readable and explicitly asks for a new check.
+  await worker.evaluate(async () => {
+    const { job } = await chrome.storage.session.get('job');
+    delete job.result.analysis;
+    await chrome.storage.session.set({ job });
+  });
+  await popup.close();
+  popup = await openPopup();
+  await expect(popup.locator('#analysis-aiOrigin .analysis-decision')).toHaveText('待重新检查');
+  await expect(popup.locator('#analysis-details')).toBeHidden();
+  assert.equal(calls.length, 1, 'upgrading never silently sends the page again');
+
+  responseMode = 'ai-negative';
+  await popup.locator('#analyze').click();
+  await expect(popup.locator('#analysis-aiOrigin .analysis-decision')).toHaveText('疑似 AI 生成');
+  await expect(popup.locator('#analysis-sentiment .analysis-decision')).toHaveText('负面');
+  await expect(popup.locator('#analysis-emotion .analysis-decision')).toHaveText('愤怒／不满');
+  await expect(popup.locator('#verdict')).toHaveText('适合转发');
+  await capture(popup, '05-ai-emotion.png');
+  responseMode = 'mixed';
+  await popup.locator('#analyze').click();
+  await expect(popup.locator('#analysis-aiOrigin .analysis-decision')).toHaveText('无法判断');
+  await expect(popup.locator('#analysis-aiOrigin')).toContainText('模型判断分歧较大');
+  await expect(popup.locator('#analysis-sentiment .analysis-decision')).toHaveText('正负混合');
+  await expect(popup.locator('#analysis-emotion .analysis-decision')).toHaveText('多种情绪交织');
+  await capture(popup, '06-uncertain-mixed.png');
 
   responseMode = 'review';
   await popup.locator('#analyze').click();
@@ -118,7 +167,7 @@ try {
   responseMode = 'skip';
   await popup.locator('#analyze').click();
   await expect(popup.locator('#verdict')).toHaveText('不建议转发');
-  for (const [mode, expected] of [['auth', 'API key 无效'], ['rate', '请求频率或额度受限'], ['malformed', '无法识别的结果']]) {
+  for (const [mode, expected] of [['auth', 'API key 无效'], ['rate', '请求频率或额度受限'], ['malformed', '无法识别的结果'], ['bad-analysis', '无法识别的结果']]) {
     responseMode = mode;
     await popup.locator('#analyze').click();
     await expect(popup.locator('#notice')).toContainText(expected);
@@ -138,6 +187,8 @@ try {
   await expect(popup.locator('#verdict')).toHaveText('适合转发');
   assert.equal(calls.at(-1).body.state.page.scope, 'selection');
   assert.equal(calls.at(-1).body.state.page.text, await article.locator('#selected').textContent());
+  await expect(popup.locator('#analysis-aiOrigin .analysis-decision')).toHaveText('无法判断');
+  await expect(popup.locator('#analysis-aiOrigin')).toContainText('文字或上下文不足');
 
   // Closing the popup does not discard a running worker request.
   delay = 1200;
@@ -203,7 +254,7 @@ try {
   await expect(popup.locator('#analyze')).toBeDisabled();
   await expect(popup.locator('#analyze')).toHaveText('请在普通网页中打开插件');
   assert.deepEqual(pageErrors, []);
-  const report = { browser: await context.browser().version(), assertions: 'passed', provider: 'intercepted synthetic responses; no live Jev call', requests: calls.length, screenshots: ['01-welcome.png', '02-settings.png', '03-result.png', '04-review.png'] };
+  const report = { browser: await context.browser().version(), assertions: 'passed', provider: 'intercepted synthetic responses; no live Jev call', requests: calls.length, screenshots: ['01-welcome.png', '02-settings.png', '03-result.png', '04-review.png', '05-ai-emotion.png', '06-uncertain-mixed.png'] };
   await writeFile(new URL('browser-report.json', artifacts), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
