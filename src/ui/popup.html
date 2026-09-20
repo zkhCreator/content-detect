@@ -1,0 +1,73 @@
+<!doctype html>
+<!-- Purpose: packaged extension UI for deliberate checks and local account settings.
+     Inputs arrive through trusted runtime messages; no remote scripts/fonts or inline code. -->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Content Detect · 转发前看一眼</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <header class="brand-row">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">c<span>↗</span></span><div><strong>content detect</strong><span class="brand-caption">让每次转发，都有方向。</span></div></div>
+    <span class="local-badge"><span aria-hidden="true">●</span> 本地设定</span>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="插件功能">
+    <button id="check-tab" role="tab" aria-controls="check-panel" aria-selected="true">内容检查</button>
+    <button id="settings-tab" role="tab" aria-controls="settings-panel" aria-selected="false" tabindex="-1">账号设定</button>
+  </nav>
+
+  <main>
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <section id="check-panel" role="tabpanel" aria-labelledby="check-tab">
+      <div id="intro">
+        <p class="eyebrow">BEFORE YOU SHARE</p>
+        <h1>值得一读，<br>也适合你转发吗<span class="accent">？</span></h1>
+        <p class="intro-copy">把当前内容与你的账号方向对照，<br>给下一次分享，多一点判断依据。</p>
+      </div>
+      <div id="direction-card" class="direction-card">
+        <div class="section-label"><span>我的账号方向</span><button id="edit-direction" class="text-button">编辑 <span aria-hidden="true">↗</span></button></div>
+        <p id="direction-text">还没有设定方向。先告诉我们你为谁分享、关注什么。</p>
+      </div>
+      <div id="idle-details" class="idle-details"><span class="mini-icon" aria-hidden="true">⌘</span><p>聚焦你想分享的内容<span>选中文字时优先检查选区，否则提取页面正文。</span></p></div>
+
+      <section id="running" class="running" aria-label="正在检查" hidden>
+        <span class="spinner" aria-hidden="true"></span><h2>正在对照你的方向</h2><p>Jev 正在评估主题、受众和表达…</p><span class="muted">可以关闭弹窗，稍后回来查看结果。</span>
+      </section>
+
+      <section id="result" class="result" aria-label="检查结果" hidden>
+        <div class="result-heading"><div><p class="eyebrow">YOUR CONTENT CHECK</p><h2 id="verdict"></h2></div><span id="verdict-symbol" class="verdict-symbol" aria-hidden="true"></span></div>
+        <p id="source-title" class="source-title"></p>
+        <p id="source-meta" class="source-meta"></p>
+        <div id="dimensions" class="dimensions"></div>
+        <div class="reason-box"><span class="section-label">判断依据 · 规则汇总</span><ul id="reasons"></ul></div>
+        <p class="result-note">概率表示模型对各项条件成立的判断，不代表转发效果或事实核验。中文结果尤其需要复核。</p>
+      </section>
+
+      <button id="analyze" class="primary" disabled>正在加载…</button>
+      <p class="privacy-note">点击检查会将账号方向、页面标题、站点来源及提取文字发送至 TypeSafe。请勿检查敏感页面。</p>
+    </section>
+
+    <section id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" hidden>
+      <p class="eyebrow">A LITTLE ABOUT YOUR ACCOUNT</p>
+      <h1 class="settings-title">先定方向，再做判断<span class="accent">。</span></h1>
+      <form id="settings-form">
+        <div class="field-heading"><label for="api-key">Jev API key</label><a href="https://console.typesafe.ai/" target="_blank" rel="noreferrer noopener">获取 Key ↗</a></div>
+        <div class="key-field"><input id="api-key" type="password" autocomplete="off" spellcheck="false" maxlength="512" placeholder="粘贴你的 API key" aria-describedby="key-help"><button id="toggle-key" type="button" aria-label="显示输入的 Key" aria-pressed="false">显示</button></div>
+        <p id="key-help" class="field-help">仅保存在当前浏览器，不参与浏览器同步。</p>
+
+        <div class="field-heading goal-heading"><label for="goal">账号方向</label><span id="goal-count" class="muted">0 / 2,000</span></div>
+        <textarea id="goal" rows="5" maxlength="2000" required aria-describedby="goal-help" placeholder="例如：面向独立开发者，分享 AI 产品、开发实践和真实创业经验。偏好具体、克制、有方法的内容；不转发夸大收益、纯营销或无依据的预测。"></textarea>
+        <p id="goal-help" class="field-help">写清受众、主题、表达偏好，以及不想转发的内容。</p>
+        <button id="save-settings" class="primary" type="submit">保存账号设定 <span aria-hidden="true">↗</span></button>
+      </form>
+      <div class="storage-note"><span aria-hidden="true">◇</span><p>你的 Key，由你保管<span>Key 保存在浏览器本地，未额外加密；只用于向 TypeSafe 认证。请保护好浏览器账户。</span></p></div>
+      <button id="clear-settings" class="clear-button" type="button" disabled>清除 Key、方向与本次结果</button>
+    </section>
+  </main>
+  <footer><span>CONTENT DETECT <span class="footer-dot">/</span> 0.1</span><a href="https://typesafe.ai/" target="_blank" rel="noreferrer noopener">Powered by Jev ↗</a></footer>
+</body>
+</html>
