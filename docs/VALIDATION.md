@@ -28,7 +28,7 @@
 - **原生工具栏弹窗外壳**：该 macOS 测试浏览器在 CDP 自动附加原生 popup target 时崩溃。回归在真实工具栏授权后，将未经修改的打包 popup 页面打开为后台标签，继续使用实际后台 worker、存储、权限和网络调用。测试仅在临时 profile 内清空 action 的 popup 配置以绕开崩溃，未修改发布包的 manifest、代码或权限。原生尺寸约束、焦点切换和点击外部自动收起仍建议安装后人工确认。
 - **Chrome 120、Edge、Firefox、Safari**：未取得对应运行时验证。120 是声明的最低 Chrome 版本；当前回归使用上面的 Chromium 版本。非 Chromium 版本只有架构计划。
 - **所有站点和语言**：未承诺对所有动态网站、iframe、Shadow DOM、图片、视频、PDF 或任意长文章提取完整。中文效果需要用自有样本验证。
-- **远端 CI**：本文件记录本地执行结果；GitHub workflow 已配置，远端执行状态应以仓库 Actions 为准。
+- **远端 CI 与仓库可见性**：源码已通过 SSH 推送到配置的远端，GitHub workflow 已配置；匿名 GitHub API 返回 404，无法据此读取远端 Actions 状态或确认可见性。本项目完成的是可公开检查，未更改仓库可见性。远端执行状态应以仓库 Actions 为准。
 
 ## 使用真实 Key 的人工验收
 
