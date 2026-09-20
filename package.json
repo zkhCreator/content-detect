@@ -1,6 +1,6 @@
 {
   "name": "content-detect",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "A privacy-conscious browser extension for checking content against your account direction with TypeSafe Jev.",
   "type": "module",

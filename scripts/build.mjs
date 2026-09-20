@@ -23,13 +23,13 @@ await copyFile(new URL('../src/ui/popup.css', import.meta.url), new URL('popup.c
 
 const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 const manifest = {
-  manifest_version: 3, name: 'Content Detect · 转发方向检查', version,
+  manifest_version: 3, name: 'OPC内容审查', version,
   description: '用 TypeSafe Jev 对照你的账号方向，检查当前页面是否适合转发。仅在手动检查时读取内容。',
   minimum_chrome_version: '120',
   permissions: ['activeTab', 'scripting', 'storage'],
   host_permissions: ['https://api.typesafe.ai/*'],
   background: { service_worker: 'background.js' },
-  action: { default_popup: 'popup.html', default_title: 'Content Detect · 检查当前内容' },
+  action: { default_popup: 'popup.html', default_title: 'OPC内容审查' },
   icons: { 16: 'icons/16.png', 48: 'icons/48.png', 128: 'icons/128.png' },
   content_security_policy: { extension_pages: "script-src 'self'; object-src 'none'; connect-src https://api.typesafe.ai; base-uri 'none'" },
 };
