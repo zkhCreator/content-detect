@@ -48,7 +48,7 @@ export async function evaluate({ apiKey, goal, page, signal }, { fetchImpl = fet
         throw new AppError('REQUEST');
       }
       let payload;
-      try { payload = await response.json(); } catch { throw new AppError('RESPONSE'); }
+      try { payload = await response.json(); } catch { throw new AppError('RESPONSE', 'response:json'); }
       const values = parseAnswers(payload);
       const analysis = parseContentAnalysis(payload, { page, contextEnough: values.contextEnough });
       const contentValue = parseContentValue(payload, { page, contextEnough: values.contextEnough });

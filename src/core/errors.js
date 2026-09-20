@@ -13,7 +13,7 @@ const messages = {
   RATE_LIMIT: 'TypeSafe 请求频率或额度受限，请稍后手动重试。',
   SERVICE: 'TypeSafe 暂时不可用，请稍后重试。',
   REQUEST: 'TypeSafe 未接受请求，请检查额度或稍后重试。',
-  RESPONSE: 'TypeSafe 返回了无法识别的结果，请稍后重试。',
+  RESPONSE: 'TypeSafe 返回了无法识别的结果。请刷新到最新插件后重试；若仍出现，请反馈错误中的诊断码。',
   NETWORK: '无法连接 TypeSafe，请检查网络后重试。',
   TIMEOUT: '检查超时，请稍后重试。',
   CANCELLED: '设置已变更，本次检查已取消，请重新检查。',
@@ -22,15 +22,26 @@ const messages = {
   INTERNAL: '扩展暂时无法完成操作，请重新打开后重试。',
 };
 
+const responseQuestions = new Set(['response', 'topicFit', 'audienceValue', 'toneFit', 'boundaryConflict', 'contextEnough', 'aiOrigin', 'sentiment', 'emotion', 'enjoyment', 'knowledge', 'resonance', 'pacing']);
+const responseReasons = new Set(['json', 'shape', 'distribution', 'total', 'choice', 'score']);
+function safeDiagnostic(value) {
+  if (typeof value !== 'string') return undefined;
+  const parts = value.split(':');
+  return parts.length === 2 && responseQuestions.has(parts[0]) && responseReasons.has(parts[1]) ? value : undefined;
+}
+
 export class AppError extends Error {
-  constructor(code) {
+  constructor(code, diagnostic) {
     super(messages[code] ?? messages.INTERNAL);
     this.name = 'AppError';
     this.code = Object.hasOwn(messages, code) ? code : 'INTERNAL';
+    this.diagnostic = this.code === 'RESPONSE' ? safeDiagnostic(diagnostic) : undefined;
+    if (this.diagnostic) this.message += `（${this.diagnostic}）`;
   }
 }
 
 export function safeError(error) {
   const code = error instanceof AppError ? error.code : 'INTERNAL';
-  return { code, message: messages[code] };
+  const diagnostic = code === 'RESPONSE' ? safeDiagnostic(error.diagnostic) : undefined;
+  return { code, message: messages[code] + (diagnostic ? `（${diagnostic}）` : '') };
 }

@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildRequest, parseAnswers, decide, validateGoal, validateKey, DIMENSIONS } from '../src/core/evaluation.js';
 import { evaluate, ENDPOINT } from '../src/core/client.js';
-import { safeError } from '../src/core/errors.js';
+import { AppError, safeError } from '../src/core/errors.js';
 import { analysisAnswers, valueAnswers } from './fixtures/answers.mjs';
 
 const page = { text: 'A practical guide to testing software.', title: 'Testing', origin: 'https://example.org/path?private=value#token' };
@@ -91,6 +91,33 @@ for (const [status, code] of [[401, 'AUTH'], [403, 'AUTH'], [429, 'RATE_LIMIT'],
     assert.equal(count, 1);
   });
 }
+
+test('independently rounded API probabilities and scores do not reject the full report', async () => {
+  const rounded = JSON.parse(JSON.stringify(payload(), (_, value) => typeof value === 'number' ? Number(value.toFixed(2)) : value));
+  assert.ok(Math.abs(Object.values(rounded.answers.emotion.probabilities).reduce((a, b) => a + b) - 1) > .001);
+  assert.ok(Math.abs(Object.entries(rounded.answers.knowledge.probabilities).reduce((a, [key, value]) => a + Number(key) * value, 0) - rounded.answers.knowledge.score) > .01);
+  let calls = 0;
+  const result = await evaluate(args, { fetchImpl: async () => { calls++; return Response.json(rounded); } });
+  assert.equal(calls, 1);
+  assert.equal(result.verdict, 'share');
+  assert.equal(result.analysis.emotion.decision, 'calm');
+  assert.equal(result.contentValue.knowledge.score, 2.88);
+  assert.deepEqual(result.contentValue.knowledge.probabilities, rounded.answers.knowledge.probabilities);
+});
+
+test('response diagnostics identify only local question ids and fixed failure reasons', async () => {
+  const broken = payload();
+  delete broken.answers.knowledge.probabilities['0'];
+  await assert.rejects(evaluate(args, { fetchImpl: async () => Response.json(broken) }), error => {
+    assert.ok(safeError(error).message.includes('knowledge:distribution'));
+    return error.code === 'RESPONSE';
+  });
+  for (const diagnostic of ['PRIVATE_RESPONSE:shape', 'emotion:PRIVATE_RESPONSE', 'emotion:shape:PRIVATE_RESPONSE']) {
+    const error = new AppError('RESPONSE', diagnostic);
+    error.message = 'PRIVATE_RESPONSE';
+    assert.ok(!safeError(error).message.includes('PRIVATE_RESPONSE'));
+  }
+});
 
 test('invalid JSON, malformed answer and network errors do not escape', async () => {
   for (const response of [new Response('not json'), Response.json({ answers: {} })]) {

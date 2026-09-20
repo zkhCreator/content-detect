@@ -63,7 +63,7 @@ try {
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
       model: 'jev-test-fixture',
       answers: { ...Object.fromEntries(Object.entries(next).map(([key, noul]) => [key, { type: 'noul', noul }])), ...analysis, ...contentValue },
-    }) });
+    }, (_, value) => typeof value === 'number' ? Number(value.toFixed(2)) : value) });
   });
   let [worker] = context.serviceWorkers();
   worker ??= await context.waitForEvent('serviceworker');
@@ -187,7 +187,7 @@ try {
   responseMode = 'skip';
   await popup.locator('#analyze').click();
   await expect(popup.locator('#verdict')).toHaveText('不建议转发');
-  for (const [mode, expected] of [['auth', 'API key 无效'], ['rate', '请求频率或额度受限'], ['malformed', '无法识别的结果'], ['bad-analysis', '无法识别的结果'], ['bad-value', '无法识别的结果']]) {
+  for (const [mode, expected] of [['auth', 'API key 无效'], ['rate', '请求频率或额度受限'], ['malformed', 'topicFit:shape'], ['bad-analysis', 'emotion:shape'], ['bad-value', 'pacing:shape']]) {
     responseMode = mode;
     await popup.locator('#analyze').click();
     await expect(popup.locator('#notice')).toContainText(expected);

@@ -82,7 +82,7 @@ export function parseAnswers(payload) {
     const answer = payload?.answers?.[id];
     if (answer?.type !== 'noul' || typeof answer.noul !== 'number'
         || !Number.isFinite(answer.noul) || answer.noul < 0 || answer.noul > 1) {
-      throw new AppError('RESPONSE');
+      throw new AppError('RESPONSE', `${id}:shape`);
     }
     values[id] = answer.noul;
   }

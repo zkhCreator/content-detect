@@ -5,6 +5,7 @@
  * Non-goals: forensic AI detection, mental-state inference, changing the repost policy.
  */
 import { AppError } from './errors.js';
+import { isUnit, parseDistribution } from './distribution.js';
 
 export const ANALYSES = [
   { id: 'aiOrigin', label: 'AI 生成判断', options: { likely_ai: '疑似 AI 生成', likely_human: '偏向人工写作', uncertain: '无法判断' } },
@@ -42,23 +43,17 @@ export const CONTENT_QUESTIONS = {
   }),
 };
 
-const probability = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
-
 export function parseContentAnalysis(payload, { page, contextEnough } = {}) {
   return Object.fromEntries(ANALYSES.map(({ id, options }) => {
     const answer = payload?.answers?.[id];
     const keys = Object.keys(options);
     if (answer?.type !== 'choice' || !Object.hasOwn(options, answer.choice)
-        || !probability(answer.confidence) || !answer.probabilities
-        || Array.isArray(answer.probabilities)
-        || Object.keys(answer.probabilities).length !== keys.length
-        || keys.some(key => !Object.hasOwn(answer.probabilities, key) || !probability(answer.probabilities[key]))) {
-      throw new AppError('RESPONSE');
+        || !isUnit(answer.confidence)) {
+      throw new AppError('RESPONSE', `${id}:shape`);
     }
-    const probabilities = Object.fromEntries(keys.map(key => [key, answer.probabilities[key]]));
-    const sum = Object.values(probabilities).reduce((total, value) => total + value, 0);
-    if (Math.abs(sum - 1) > 0.001 || probabilities[answer.choice] + 0.000001 < Math.max(...Object.values(probabilities))) {
-      throw new AppError('RESPONSE');
+    const probabilities = parseDistribution(answer.probabilities, keys, id);
+    if (probabilities[answer.choice] + 0.000001 < Math.max(...Object.values(probabilities))) {
+      throw new AppError('RESPONSE', `${id}:choice`);
     }
     const insufficient = (contextEnough !== undefined && contextEnough < 0.7)
       || (id === 'aiOrigin' && typeof page?.text === 'string' && page.text.trim().length < MIN_AI_TEXT_LENGTH);

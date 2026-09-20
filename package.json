@@ -1,6 +1,6 @@
 {
   "name": "content-detect",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "description": "Review page content value, AI authorship clues, emotion and account fit with TypeSafe Jev.",
   "type": "module",
