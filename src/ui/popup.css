@@ -83,8 +83,16 @@ textarea { width: 100%; display: block; padding: 12px; resize: vertical; min-hei
 .analysis-decision { font-weight: 600; text-align: right; }
 .analysis-row small { grid-column: 1 / -1; color: var(--muted); font-size: 10px; line-height: 1.6; }
 .analysis-note { font-size: 9px; color: var(--muted); line-height: 1.6; margin: 9px 0 0; }
-#analysis-details { margin-top: 8px; font-size: 10px; }
-#analysis-details summary { cursor: pointer; color: var(--orange); padding: 3px 0; }
+#analysis-details, #value-details { margin-top: 8px; font-size: 10px; }
+#analysis-details summary, #value-details summary { cursor: pointer; color: var(--orange); padding: 3px 0; }
+.value-intro { margin-bottom: 6px; }
+.value-row { padding: 11px 0; border-bottom: 1px solid var(--line); }
+.value-heading { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.value-rating { color: var(--orange); font-size: 11px; font-variant-numeric: tabular-nums; }
+.value-feeling { font-size: 10px; margin: 5px 0 8px; color: var(--muted); }
+.value-meter { display: block; height: 4px; }
+.value-explanation { font-size: 10px; line-height: 1.6; margin: 7px 0 0; color: var(--muted); }
+#value-rubrics ol { padding-left: 18px; margin: 0; color: var(--muted); line-height: 1.7; }
 .probability-group { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 8px; }
 .probability-group p { margin: 0 0 7px; font-weight: 550; }
 .probability-group > div { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted); }

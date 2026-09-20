@@ -6,6 +6,7 @@
  */
 import { DIMENSIONS } from '../core/evaluation.js';
 import { ANALYSES } from '../core/content-analysis.js';
+import { VALUE_DIMENSIONS } from '../core/content-value.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
 const $ = id => document.getElementById(id);
@@ -104,6 +105,62 @@ function renderAnalysis(analysis) {
   }
 }
 
+function renderContentValue(contentValue) {
+  const reasons = {
+    insufficient: '上下文不足，暂不评分。',
+    partialStructure: '选区、截断或整页回退不能代表完整正文，暂不判断全文节奏。',
+    lowConfidence: '模型判断分歧较大，暂不展示评分，请人工复核。',
+  };
+  $('value-summaries').replaceChildren(...VALUE_DIMENSIONS.map(({ id, label, feeling, description, summaries }) => {
+    const answer = contentValue?.[id];
+    const row = document.createElement('div');
+    row.className = 'value-row';
+    row.id = `value-${id}`;
+    const heading = document.createElement('div');
+    heading.className = 'value-heading';
+    const title = document.createElement('strong');
+    title.textContent = label;
+    title.title = description;
+    const rating = document.createElement('span');
+    rating.className = 'value-rating';
+    rating.textContent = !answer ? '待重新检查' : answer.reason ? answer.reason === 'lowConfidence' ? '待复核' : '无法判断' : `${answer.score.toFixed(1)} / 4`;
+    heading.append(title, rating);
+    const quote = document.createElement('p');
+    quote.className = 'value-feeling';
+    quote.textContent = `“${feeling}”`;
+    row.append(heading, quote);
+    if (answer && !answer.reason) {
+      const meter = document.createElement('span');
+      meter.className = 'meter value-meter';
+      meter.setAttribute('aria-hidden', 'true');
+      const fill = document.createElement('span');
+      fill.style.width = `${answer.score * 25}%`;
+      meter.append(fill);
+      row.append(meter);
+    }
+    const explanation = document.createElement('p');
+    explanation.className = 'value-explanation';
+    explanation.textContent = !answer ? '旧结果不含此项，重新检查即可获取。' : answer.reason ? reasons[answer.reason] : `邻近评分标准：${summaries[Math.round(answer.score)]}`;
+    row.append(explanation);
+    return row;
+  }));
+  $('value-rubrics').replaceChildren(...VALUE_DIMENSIONS.map(({ label, description, summaries }) => {
+    const group = document.createElement('div');
+    group.className = 'probability-group';
+    const title = document.createElement('p');
+    title.textContent = `${label} · ${description}`;
+    const list = document.createElement('ol');
+    list.start = 0;
+    list.replaceChildren(...summaries.map(text => {
+      const item = document.createElement('li');
+      item.textContent = text;
+      return item;
+    }));
+    group.append(title, list);
+    return group;
+  }));
+}
+
 function renderJob(job) {
   clearTimeout(poll);
   busy = job?.status === 'running';
@@ -123,6 +180,7 @@ function renderJob(job) {
     $('source-title').textContent = page.title || '未命名页面';
     $('source-meta').textContent = `${page.origin} · ${page.scope === 'selection' ? '选区' : '正文'} ${page.characters.toLocaleString()} 字符 · ${new Date(job.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     renderAnalysis(result.analysis);
+    renderContentValue(result.contentValue);
     $('dimensions').replaceChildren(...DIMENSIONS.map(dimension => {
       const value = result.values[dimension.id];
       const row = document.createElement('div');
