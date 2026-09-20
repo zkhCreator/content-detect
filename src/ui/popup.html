@@ -1,5 +1,6 @@
 <!doctype html>
-<!-- Purpose: packaged extension UI for deliberate checks and local account settings.
+<!-- Purpose: packaged content review UI centered on four values, AI clues and emotion,
+     with account-fit guidance as a supporting result and local account settings.
      Inputs arrive through trusted runtime messages; no remote scripts/fonts or inline code. -->
 <html lang="zh-CN">
 <head>
@@ -11,7 +12,7 @@
 </head>
 <body>
   <header class="brand-row">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">c<span>↗</span></span><div><strong>OPC内容审查</strong><span class="brand-caption">让每次转发，都有方向。</span></div></div>
+    <div class="brand"><span class="brand-mark" aria-hidden="true">O<span>·</span></span><div><strong>OPC内容审查</strong><span class="brand-caption">看清内容价值与表达。</span></div></div>
     <span class="local-badge"><span aria-hidden="true">●</span> 本地设定</span>
   </header>
 
@@ -24,34 +25,30 @@
     <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
     <section id="check-panel" role="tabpanel" aria-labelledby="check-tab">
       <div id="intro">
-        <p class="eyebrow">BEFORE YOU SHARE</p>
-        <h1>值得一读，<br>也适合你转发吗<span class="accent">？</span></h1>
-        <p class="intro-copy">对照账号方向，查看内容价值、AI 迹象与情绪，给下一次分享，多一点判断依据。</p>
+        <p class="eyebrow">OPC CONTENT REVIEW</p>
+        <h1>这段内容，<br>给读者带来了什么<span class="accent">？</span></h1>
+        <p class="intro-copy">从四个要素看内容价值，同时检查 AI 生成迹象与情绪表达。</p>
+        <dl class="review-preview" aria-label="内容价值四要素简介">
+          <div><dt>快乐幽默</dt><dd>看着真有意思。</dd></div>
+          <div><dt>知识</dt><dd>原来如此，学到了。</dd></div>
+          <div><dt>共鸣</dt><dd>我也这样，我能理解他。</dd></div>
+          <div><dt>节奏</dt><dd>我还想继续看。</dd></div>
+        </dl>
       </div>
       <div id="direction-card" class="direction-card">
-        <div class="section-label"><span>我的账号方向</span><button id="edit-direction" class="text-button">编辑 <span aria-hidden="true">↗</span></button></div>
-        <p id="direction-text">还没有设定方向。先告诉我们你为谁分享、关注什么。</p>
+        <div class="section-label"><span>账号方向 · 辅助匹配</span><button id="edit-direction" class="text-button">编辑 <span aria-hidden="true">↗</span></button></div>
+        <p id="direction-text">设定受众与关注主题，检查时也会提供账号匹配建议。</p>
       </div>
-      <div id="idle-details" class="idle-details"><span class="mini-icon" aria-hidden="true">⌘</span><p>聚焦你想分享的内容<span>选中文字时优先检查选区，否则提取页面正文。</span></p></div>
+      <div id="idle-details" class="idle-details"><span class="mini-icon" aria-hidden="true">⌘</span><p>聚焦你想审查的文字<span>选中文字时检查选区，否则提取正文。仅评估文字，不分析视频画面或声音。</span></p></div>
 
       <section id="running" class="running" aria-label="正在检查" hidden>
-        <span class="spinner" aria-hidden="true"></span><h2>正在对照你的方向</h2><p>Jev 正在评估转发适配、内容价值、AI 迹象与情绪…</p><span class="muted">可以关闭弹窗，稍后回来查看结果。</span>
+        <span class="spinner" aria-hidden="true"></span><h2>正在审查当前内容</h2><p>评估四项内容价值、AI 迹象、情绪与账号匹配…</p><span class="muted">可以关闭弹窗，稍后回来查看结果。</span>
       </section>
 
       <section id="result" class="result" aria-label="检查结果" hidden>
-        <div class="result-heading"><div><p class="eyebrow">YOUR CONTENT CHECK</p><h2 id="verdict"></h2></div><span id="verdict-symbol" class="verdict-symbol" aria-hidden="true"></span></div>
+        <div class="result-heading"><div><p class="eyebrow">OPC CONTENT REVIEW</p><h2>内容审查报告</h2></div><span class="report-badge">文字分析</span></div>
         <p id="source-title" class="source-title"></p>
         <p id="source-meta" class="source-meta"></p>
-        <section class="analysis-card" aria-label="AI 生成判断与内容情绪">
-          <h3>内容特征</h3>
-          <div id="analysis-summaries"></div>
-          <details id="analysis-details">
-            <summary>查看模型概率</summary>
-            <div id="analysis-probabilities"></div>
-            <p class="analysis-note">选项概率与置信度是模型判断，不是检测准确率；置信度表示选项分布的集中程度。</p>
-          </details>
-          <p class="analysis-note">AI 来源仅凭文本无法证实；情绪描述文本表达，不代表作者的真实心理状态。</p>
-        </section>
         <section class="analysis-card" aria-label="内容价值四要素">
           <h3>内容价值 · 四要素</h3>
           <p class="analysis-note value-intro">快乐幽默、知识、共鸣与节奏各有价值，不必每项都高分。</p>
@@ -62,9 +59,26 @@
           </details>
           <p class="analysis-note">评分是模型在五档标准上的加权位置，不是概率。说明来自本地标准，非模型逐句举证。仅评估提取文字；节奏不包含视频剪辑、声音与实际观看效果。</p>
         </section>
-        <div id="dimensions" class="dimensions"></div>
-        <div class="reason-box"><span class="section-label">判断依据 · 规则汇总</span><ul id="reasons"></ul></div>
-        <p class="result-note">概率表示模型对各项条件成立的判断，不代表转发效果或事实核验。中文结果尤其需要复核。</p>
+        <section class="analysis-card" aria-label="AI 生成判断与内容情绪">
+          <h3>内容特征</h3>
+          <div id="analysis-summaries"></div>
+          <details id="analysis-details">
+            <summary>查看模型概率</summary>
+            <div id="analysis-probabilities"></div>
+            <p class="analysis-note">选项概率与置信度是模型判断，不是检测准确率；置信度表示选项分布的集中程度。</p>
+          </details>
+          <p class="analysis-note">AI 来源仅凭文本无法证实；情绪描述文本表达，不代表作者的真实心理状态。</p>
+        </section>
+        <section class="account-fit" aria-label="账号匹配参考">
+          <div class="section-label">账号匹配 · 辅助参考</div>
+          <div class="account-verdict"><h3 id="verdict"></h3><span id="verdict-symbol" class="verdict-symbol" aria-hidden="true"></span></div>
+          <details id="fit-details">
+            <summary>查看账号匹配依据</summary>
+            <div id="dimensions" class="dimensions"></div>
+            <div class="reason-box"><span class="section-label">判断依据 · 规则汇总</span><ul id="reasons"></ul></div>
+            <p class="result-note">概率表示模型对各项条件成立的判断，不代表转发效果或事实核验。中文结果尤其需要复核。</p>
+          </details>
+        </section>
       </section>
 
       <button id="analyze" class="primary" disabled>正在加载…</button>
@@ -73,7 +87,8 @@
 
     <section id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" hidden>
       <p class="eyebrow">A LITTLE ABOUT YOUR ACCOUNT</p>
-      <h1 class="settings-title">先定方向，再做判断<span class="accent">。</span></h1>
+      <h1 class="settings-title">设定你的审查背景<span class="accent">。</span></h1>
+      <p class="settings-copy">Key 用于启动检查；账号方向用于辅助匹配。四要素、AI 迹象与情绪根据文字本身分析。</p>
       <form id="settings-form">
         <div class="field-heading"><label for="api-key">Jev API key</label><a href="https://console.typesafe.ai/" target="_blank" rel="noreferrer noopener">获取 Key ↗</a></div>
         <div class="key-field"><input id="api-key" type="password" autocomplete="off" spellcheck="false" maxlength="512" placeholder="粘贴你的 API key" aria-describedby="key-help"><button id="toggle-key" type="button" aria-label="显示输入的 Key" aria-pressed="false">显示</button></div>
@@ -81,13 +96,13 @@
 
         <div class="field-heading goal-heading"><label for="goal">账号方向</label><span id="goal-count" class="muted">0 / 2,000</span></div>
         <textarea id="goal" rows="5" maxlength="2000" required aria-describedby="goal-help" placeholder="例如：面向独立开发者，分享 AI 产品、开发实践和真实创业经验。偏好具体、克制、有方法的内容；不转发夸大收益、纯营销或无依据的预测。"></textarea>
-        <p id="goal-help" class="field-help">写清受众、主题、表达偏好，以及不想转发的内容。</p>
+        <p id="goal-help" class="field-help">写清受众、主题、表达偏好与内容边界，用于账号匹配建议。</p>
         <button id="save-settings" class="primary" type="submit">保存账号设定 <span aria-hidden="true">↗</span></button>
       </form>
       <div class="storage-note"><span aria-hidden="true">◇</span><p>你的 Key，由你保管<span>Key 保存在浏览器本地，未额外加密；只用于向 TypeSafe 认证。请保护好浏览器账户。</span></p></div>
       <button id="clear-settings" class="clear-button" type="button" disabled>清除 Key、方向与本次结果</button>
     </section>
   </main>
-  <footer><span>OPC内容审查 <span class="footer-dot">/</span> 0.3.1</span><a href="https://typesafe.ai/" target="_blank" rel="noreferrer noopener">Powered by Jev ↗</a></footer>
+  <footer><span>OPC内容审查 <span class="footer-dot">/</span> 0.3.2</span><a href="https://typesafe.ai/" target="_blank" rel="noreferrer noopener">Powered by Jev ↗</a></footer>
 </body>
 </html>

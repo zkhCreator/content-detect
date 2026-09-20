@@ -98,7 +98,7 @@ try {
   let popup = await openPopup();
   await capture(popup, '01-welcome.png');
   assert.equal(calls.length, 0, 'opening the extension must not call the provider');
-  await popup.getByRole('button', { name: '先设定我的账号方向 ↗' }).click();
+  await popup.getByRole('button', { name: '配置 Key 与审查背景 ↗' }).click();
   await popup.getByLabel('Jev API key', { exact: true }).fill('fixture-key-not-a-credential');
   await popup.getByLabel('账号方向', { exact: true }).fill(goal);
   await popup.getByRole('button', { name: '保存账号设定' }).click();

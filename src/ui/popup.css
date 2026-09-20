@@ -27,6 +27,9 @@ a:hover { text-decoration: underline; }
 h1 { font-size: 29px; line-height: 1.42; letter-spacing: -1px; margin: 0; font-weight: 650; }
 .accent { color: var(--orange); }
 .intro-copy { color: var(--muted); font-size: 12px; line-height: 1.8; margin: 10px 0 20px; }
+.review-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 16px; margin: 0 0 20px; padding: 15px; border-radius: 8px; background: #eeeee6; }
+.review-preview dt { font-size: 12px; font-weight: 600; }
+.review-preview dd { margin: 5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
 .direction-card { border: 1px solid var(--line); border-left: 3px solid #b6bea8; border-radius: 8px; padding: 12px 13px; background: #fcfbf7; }
 .section-label { font-size: 10px; color: var(--muted); letter-spacing: .4px; font-weight: 550; }
 .text-button { background: none; border: 0; padding: 0; color: var(--muted); font-size: 10px; }
@@ -44,7 +47,8 @@ footer a { color: var(--muted); letter-spacing: 0; font-size: 9px; }
 .footer-dot { margin: 0 5px; color: #b2b8a8; }
 .notice { background: #f5e9de; border: 1px solid #e8d4c2; border-radius: 7px; padding: 10px 12px; font-size: 11px; line-height: 1.6; margin-bottom: 15px; overflow-wrap: anywhere; }
 .notice[data-kind="success"] { background: #eef1e8; border-color: #d9e1d0; }
-.settings-title { font-size: 23px; margin: 0 0 21px; }
+.settings-title { font-size: 23px; margin: 0 0 10px; }
+.settings-copy { font-size: 11px; color: var(--muted); line-height: 1.7; margin: 0 0 21px; }
 .field-heading { font-size: 11px; margin-bottom: 9px; }
 .field-heading label { font-weight: 600; }
 .field-heading a, .field-heading .muted { font-size: 10px; }
@@ -71,7 +75,13 @@ textarea { width: 100%; display: block; padding: 12px; resize: vertical; min-hei
 .result-heading { margin-bottom: 13px; }
 .result-heading .eyebrow { margin: 0 0 8px; }
 .result h2 { font-size: 25px; margin: 0; letter-spacing: -.6px; }
-.verdict-symbol { width: 41px; height: 41px; background: #e8eee0; color: #476944; border-radius: 50%; text-align: center; line-height: 41px; font-size: 25px; }
+.report-badge { border: 1px solid var(--line); border-radius: 20px; padding: 5px 8px; font-size: 10px; color: var(--muted); }
+.account-fit { border-top: 1px solid var(--line); padding-top: 16px; }
+.account-verdict { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+.account-verdict h3 { font-size: 17px; margin: 0; font-weight: 600; }
+.verdict-symbol { width: 28px; height: 28px; background: #e8eee0; color: #476944; border-radius: 50%; text-align: center; line-height: 28px; font-size: 19px; }
+#fit-details { font-size: 10px; }
+#fit-details summary { cursor: pointer; color: var(--muted); padding: 3px 0; }
 .result[data-verdict="review"] .verdict-symbol { color: #8a661f; background: #f1e7cb; }
 .result[data-verdict="skip"] .verdict-symbol { color: #a24930; background: #f1e0d7; }
 .source-title { font-size: 12px; overflow-wrap: anywhere; margin: 0 0 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

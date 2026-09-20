@@ -1,5 +1,5 @@
 /**
- * Purpose: render account settings and explicit page-check states in a packaged popup.
+ * Purpose: render content value, AI/emotion analysis, supporting account fit and local settings.
  * Inputs: user events and redacted background messages. Outputs: text-only DOM updates.
  * Decisions: never request the saved key; no automatic analysis on open; poll active jobs.
  * Non-goals: API calls, content extraction, HTML rendering from pages or model responses.
@@ -40,7 +40,7 @@ function showTab(name) {
 }
 
 function renderSettings() {
-  $('direction-text').textContent = settings.goal || '还没有设定方向。先告诉我们你为谁分享、关注什么。';
+  $('direction-text').textContent = settings.goal || '设定受众与关注主题，检查时也会提供账号匹配建议。';
   $('goal').value = settings.goal;
   $('goal-count').textContent = `${settings.goal.length.toLocaleString()} / 2,000`;
   $('api-key').value = '';
@@ -56,7 +56,7 @@ function renderSettings() {
 function renderAction() {
   const configured = settings.hasKey && Boolean(settings.goal);
   $('analyze').disabled = busy || (configured && tabId === null);
-  $('analyze').textContent = busy ? '正在检查…' : !configured ? '先设定我的账号方向 ↗' : tabId === null ? '请在普通网页中打开插件' : document.body.dataset.state === 'done' ? '重新检查当前内容 ↗' : '检查当前页 ↗';
+  $('analyze').textContent = busy ? '正在审查…' : !configured ? '配置 Key 与审查背景 ↗' : tabId === null ? '请在普通网页中打开插件' : document.body.dataset.state === 'done' ? '重新审查当前内容 ↗' : '审查当前内容 ↗';
 }
 
 function renderAnalysis(analysis) {

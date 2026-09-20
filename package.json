@@ -1,8 +1,8 @@
 {
   "name": "content-detect",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
-  "description": "A privacy-conscious browser extension for checking content against your account direction with TypeSafe Jev.",
+  "description": "Review page content value, AI authorship clues, emotion and account fit with TypeSafe Jev.",
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {

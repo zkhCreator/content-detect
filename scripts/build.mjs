@@ -24,7 +24,7 @@ await copyFile(new URL('../src/ui/popup.css', import.meta.url), new URL('popup.c
 const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 const manifest = {
   manifest_version: 3, name: 'OPC内容审查', version,
-  description: '用 TypeSafe Jev 对照你的账号方向，检查当前页面是否适合转发。仅在手动检查时读取内容。',
+  description: '审查页面文字的快乐幽默、知识、共鸣与节奏，分析 AI 迹象和情绪，辅助判断账号匹配。仅在手动检查时读取内容。',
   minimum_chrome_version: '120',
   permissions: ['activeTab', 'scripting', 'storage'],
   host_permissions: ['https://api.typesafe.ai/*'],
