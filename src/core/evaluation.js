@@ -6,6 +6,7 @@
  */
 import { AppError } from './errors.js';
 import { CONTENT_QUESTIONS } from './content-analysis.js';
+import { VALUE_QUESTIONS } from './content-value.js';
 
 export const MAX_GOAL_LENGTH = 2000;
 export const MAX_TEXT_LENGTH = 12000;
@@ -70,6 +71,7 @@ export function buildRequest(goal, page) {
       contextEnough: question('Does `page.text` contain enough coherent source material to assess its suitability for reposting against `accountGoal`?',
         'The supplied text is understandable and substantive enough to judge on its own.', 'It is only navigation, a login/paywall notice, disconnected fragments, or relies on missing image/video/context.'),
       ...CONTENT_QUESTIONS,
+      ...VALUE_QUESTIONS,
     },
   };
 }

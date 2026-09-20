@@ -6,12 +6,12 @@ import assert from 'node:assert/strict';
 import { buildRequest, parseAnswers, decide, validateGoal, validateKey, DIMENSIONS } from '../src/core/evaluation.js';
 import { evaluate, ENDPOINT } from '../src/core/client.js';
 import { safeError } from '../src/core/errors.js';
-import { analysisAnswers } from './fixtures/answers.mjs';
+import { analysisAnswers, valueAnswers } from './fixtures/answers.mjs';
 
 const page = { text: 'A practical guide to testing software.', title: 'Testing', origin: 'https://example.org/path?private=value#token' };
 const goal = 'Share practical software engineering guides.';
 const values = { topicFit: 0.9, audienceValue: 0.9, toneFit: 0.9, boundaryConflict: 0.1, contextEnough: 0.9 };
-const payload = (v = values) => ({ answers: { ...Object.fromEntries(Object.entries(v).map(([k, n]) => [k, { type: 'noul', noul: n }])), ...analysisAnswers() } });
+const payload = (v = values) => ({ answers: { ...Object.fromEntries(Object.entries(v).map(([k, n]) => [k, { type: 'noul', noul: n }])), ...analysisAnswers(), ...valueAnswers() } });
 const args = { apiKey: 'fixture-key-not-a-credential', goal, page };
 
 test('request contains only allowed page data and complete independent questions', () => {
@@ -21,12 +21,13 @@ test('request contains only allowed page data and complete independent questions
   assert.equal(request.state.page.text.length, 12000);
   assert.equal(request.state.page.truncated, true);
   assert.equal(JSON.stringify(request).includes('never transmit'), false);
-  assert.equal(Object.keys(request.questions).length, 8);
+  assert.equal(Object.keys(request.questions).length, 12);
   for (const q of Object.values(request.questions)) {
     assert.ok(q.instructions.boundary.includes('untrusted'));
     assert.ok(q.instructions.question.includes('`page.text`'));
     if (q.type === 'noul') assert.ok(q.criteria.true && q.criteria.false);
-    else { assert.equal(q.type, 'choice'); assert.ok(q.criteria.uncertain); }
+    else if (q.type === 'choice') assert.ok(q.criteria.uncertain);
+    else { assert.equal(q.type, 'score'); assert.equal(q.criteria.length, 5); }
   }
 });
 
@@ -77,6 +78,7 @@ test('HTTP client authenticates only to the fixed host and validates response', 
   assert.equal(result.verdict, 'share');
   assert.equal(result.analysis.sentiment.decision, 'neutral');
   assert.equal(result.analysis.aiOrigin.decision, 'uncertain', 'short text cannot establish authorship');
+  assert.ok(result.contentValue.knowledge.score > result.contentValue.enjoyment.score);
 });
 
 for (const [status, code] of [[401, 'AUTH'], [403, 'AUTH'], [429, 'RATE_LIMIT'], [500, 'SERVICE'], [400, 'REQUEST']]) {
