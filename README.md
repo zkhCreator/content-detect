@@ -4,26 +4,76 @@
 
 Chrome Manifest V3 扩展，使用 [TypeSafe Jev](https://typesafe.ai/) 判断当前页面是否适合转发到自己的账号。你提供 API key，用自然语言描述受众、主题、表达偏好和不想分享的内容。
 
-## 安装
+## 安装与首次使用
 
-需要 Node.js 22+、npm 和 Chrome 120+。
+目前通过 Chrome 的「加载已解压的扩展程序」安装本地构建。
+
+### 1. 准备环境
+
+- Chrome 120 或更新版本。
+- Node.js 22 或更新版本，以及 npm。在终端运行 `node --version`、`npm --version` 确认已安装。
+- Git 和本仓库的访问权限，用于下载与更新源码。
+- 自己的 [TypeSafe API key](https://console.typesafe.ai/)，在首次使用时填写；安装和构建不需要 Key。
+
+### 2. 下载并构建
+
+在终端执行：
 
 ```sh
+git clone https://github.com/zkhCreator/content-detect.git
+cd content-detect
 npm ci
 npm run build
 ```
 
-1. 打开 Chrome 的 `chrome://extensions`，启用「开发者模式」。
-2. 点击「加载已解压的扩展程序」，选择本项目的 **`dist/chrome`** 目录。
-3. 在工具栏固定 Content Detect，打开任意普通网页。
-4. 打开插件，进入「账号设定」，填写自己的 [TypeSafe API key](https://console.typesafe.ai/) 和账号方向，保存。
-5. 点击「检查当前页」。选中文字时优先检查选区；未选择时提取正文。打开弹窗本身不产生请求。
+如果已经有项目源码，直接在项目根目录执行最后两条命令即可。构建成功后会生成 `dist/chrome` 目录，其中包含 `manifest.json`。构建完成即可关闭终端，使用插件不需要一直运行开发服务。
+
+### 3. 加载到 Chrome
+
+1. 在 Chrome 地址栏输入 `chrome://extensions` 并打开。
+2. 打开页面右上角的「开发者模式」。
+3. 点击「加载已解压的扩展程序」。
+4. 选择项目内的 **`dist/chrome` 文件夹**，不要选择项目根目录、`dist` 目录或单独的 `manifest.json` 文件。
+5. 确认扩展列表出现「Content Detect · 转发方向检查」，且开关已启用。
+6. 点击 Chrome 工具栏的拼图图标，在扩展列表中固定 Content Detect，方便随时打开。
+
+请保留该构建目录；Chrome 会从所选目录加载插件文件。
+
+### 4. 配置并检查内容
+
+1. 打开一篇普通网页文章，点击工具栏上的 Content Detect 图标。
+2. 进入「账号设定」，填写自己的 Jev API key 和账号方向，点击「保存账号设定」。
+3. 回到「内容检查」，点击「检查当前页」。选中文字时优先检查选区；未选择时提取正文。打开弹窗本身不产生请求。
+4. 查看「适合转发」「建议先复核」或「不建议转发」，并结合下方五项判断决定是否分享。
 
 示例账号方向：
 
 > 面向独立开发者，分享 AI 产品、开发实践和真实创业经验。偏好具体、克制、有方法的内容；不转发夸大收益、纯营销或无依据的预测。
 
-重新构建后，在扩展管理页点击刷新。不要将 Key 放进代码、终端命令、`.env`、截图或 Git 提交。Key 只需在插件界面输入。
+不要将 Key 放进代码、终端命令、`.env`、截图或 Git 提交。Key 只需在插件界面输入。
+
+### 更新已安装的插件
+
+在项目根目录执行：
+
+```sh
+git pull --ff-only
+npm ci
+npm run build
+```
+
+然后打开 `chrome://extensions`，点击 Content Detect 卡片上的刷新按钮，再重新打开插件。沿用原安装目录即可，无需先卸载；卸载会清除已保存的设定。
+
+### 常见安装问题
+
+| 问题 | 处理方法 |
+| --- | --- |
+| 终端提示找不到 `node` 或 `npm` | 安装 Node.js 22+ 后重新打开终端，再检查版本 |
+| 找不到 `dist/chrome` | 确认在项目根目录执行了 `npm ci` 和 `npm run build`，且构建没有报错 |
+| Chrome 提示缺少或无法加载清单文件 | 选择包含 `manifest.json` 的 `dist/chrome` 文件夹 |
+| 修改代码后插件没有变化 | 重新运行 `npm run build`，并在扩展管理页刷新插件 |
+| 提示当前页面无法读取 | 切换到普通 HTTP/HTTPS 网页；浏览器设置页、扩展商店页和 PDF 可能不支持 |
+| 提示 API key 无效或没有访问权限 | 在「账号设定」中替换 Key 并保存，再手动检查 |
 
 ## 看懂结果
 
