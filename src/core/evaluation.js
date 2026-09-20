@@ -1,10 +1,11 @@
 /**
  * Purpose: turn an account direction and page text into independent Jev judgments.
- * Inputs: user goal, extracted text; typed Noul responses. Outputs: request and verdict.
+ * Inputs: user goal, extracted text; typed responses. Outputs: batched request and repost verdict.
  * Decisions: explicit non-compensating boundaries; uncertainty routes to human review.
  * Non-goals: generated explanations, factual verification, publication, browser I/O.
  */
 import { AppError } from './errors.js';
+import { CONTENT_QUESTIONS } from './content-analysis.js';
 
 export const MAX_GOAL_LENGTH = 2000;
 export const MAX_TEXT_LENGTH = 12000;
@@ -68,6 +69,7 @@ export function buildRequest(goal, page) {
         'At least one explicit user constraint is violated.', 'No explicit constraint is violated, or the goal specifies no exclusions. Do not invent exclusions.'),
       contextEnough: question('Does `page.text` contain enough coherent source material to assess its suitability for reposting against `accountGoal`?',
         'The supplied text is understandable and substantive enough to judge on its own.', 'It is only navigation, a login/paywall notice, disconnected fragments, or relies on missing image/video/context.'),
+      ...CONTENT_QUESTIONS,
     },
   };
 }

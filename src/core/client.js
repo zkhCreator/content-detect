@@ -6,6 +6,7 @@
  */
 import { AppError } from './errors.js';
 import { buildRequest, parseAnswers, decide, validateKey } from './evaluation.js';
+import { parseContentAnalysis } from './content-analysis.js';
 
 export const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 
@@ -48,7 +49,8 @@ export async function evaluate({ apiKey, goal, page, signal }, { fetchImpl = fet
       let payload;
       try { payload = await response.json(); } catch { throw new AppError('RESPONSE'); }
       const values = parseAnswers(payload);
-      return { values, ...decide(values, page) };
+      const analysis = parseContentAnalysis(payload, { page, contextEnough: values.contextEnough });
+      return { values, analysis, ...decide(values, page) };
     })()]);
   } catch (error) {
     if (error instanceof AppError) throw error;
